@@ -70,3 +70,5 @@ def play_game():
             return None
         
 Winner = play_game()
+if Winner:
+    print(f"The Winner is: {Winner}")
