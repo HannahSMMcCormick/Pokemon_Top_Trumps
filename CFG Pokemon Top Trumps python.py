@@ -12,11 +12,11 @@ def get_random_pokemon_id():
 #get pokemon info from API
 def get_pokemon_data(pokemon_id):
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id}/"
-    responce = requests.get(url)
+    response = requests.get(url)
 
 #Checks for successful request 
-    if responce.status_code == 200:
-        data = responce.json()
+    if response.status_code == 200:
+        data = response.json()
         return{
             'name': data['name'],
             'id':data['id'],
