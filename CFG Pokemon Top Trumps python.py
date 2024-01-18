@@ -9,7 +9,7 @@ def get_random_pokemon_id():
     return random.randint(1,151)
 
 
-#get pokemon info
+#get pokemon info from API
 def get_pokemon_data(pokemon_id):
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id}/"
     responce = requests.get(url)
@@ -42,27 +42,37 @@ def compare_stats(player_pokemon, opponent_pokemon, player_stat, opponent_stat, 
         print(f"It's a tie! Both have the same{stat_name}.")
         return 'tie',None
 
+def choose_pokemon():
+    pokemon_list = [get_pokemon_data(get_random_pokemon_id())for i in range(3)]
+
+    print("Choose your pokemon:")
+    for i, pokemon in enumerate(pokemon_list, start=1):
+        print(f"{i}. {pokemon['name'].capitalize()} (ID: {pokemon['id']}) (height: {pokemon['height']}) (weight:{pokemon['weight']})")
+
+    while True:
+        try: 
+            choice = int(input("Enter the number of your chosen Pokemon: "))
+            if 1 <= choice <= len(pokemon_list):
+                return pokemon_list[choice - 1]
+            else: 
+                print("Invalid input. Please enter a valid number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
 #Sets up game
 def play_game():
 
-    player_pokemon = None
-    opponent_pokemon = None
+    player_pokemon = choose_pokemon()
+    opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
 
     #Give Player/Computer ther card
     while True: 
-        player_pokemon_id = get_random_pokemon_id()
-        opponent_pokemon_id = get_random_pokemon_id()
-
-        #Fetches data for card
-        player_pokemon = get_pokemon_data(player_pokemon_id)
-        opponent_pokemon = get_pokemon_data(opponent_pokemon_id)
-
-        #If both player and pokemon have card
-        if player_pokemon and opponent_pokemon:
             print(f"Your Pokemon: {player_pokemon['name']} (ID: {player_pokemon['id']}) (height: {player_pokemon['height']}) (weight:{player_pokemon['weight']})")
 
+            #Player chooses stat
             stat_choices = ['id', 'height', 'weight']
-            chosen_stat = input("Choose a stat to compare (id,height,or weight)")
+            chosen_stat = input("Choose a stat to compare (id,height,or weight)").lower()
+
 
             if chosen_stat in stat_choices:
                 winner,winning_pokemon = compare_stats(
@@ -79,9 +89,12 @@ def play_game():
             else:
                 print("Invalid stat choice. Please choose id, height, or weight.")
 
-        play_again = input("\nDo you want to play again? (yes/no): ")
-        if play_again.lower() != 'yes':
-            break
+            play_again = input("\nDo you want to play again? (yes/no): ")
+            if play_again.lower() == 'yes':
+                player_pokemon = choose_pokemon()
+                opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
+            else:
+                break
 
 if __name__ == "__main__":
     play_game()
