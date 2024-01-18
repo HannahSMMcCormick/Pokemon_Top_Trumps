@@ -59,9 +59,7 @@ def play_game():
 
         #If both player and pokemon have card
         if player_pokemon and opponent_pokemon:
-            print(f"Your Pokemon: {player_pokemon['name']} (ID: {player_pokemon['id']})")
-            print(f"Opponent's Pokemon: {opponent_pokemon['name']} (ID:{opponent_pokemon['id']})")
-
+            print(f"Your Pokemon: {player_pokemon['name']} (ID: {player_pokemon['id']}) (height: {player_pokemon['height']}) (weight:{player_pokemon['weight']})")
 
             stat_choices = ['id', 'height', 'weight']
             chosen_stat = input("Choose a stat to compare (id,height,or weight)")
@@ -76,7 +74,7 @@ def play_game():
                     player_pokemon['name'],
                     opponent_pokemon['name']
                     )
-                print(f"\n{winning_pokemon} beat {player_pokemon['name']}." if winner == 'player' else f"{opponent_pokemon['name']} beat {winning_pokemon}.")
+                print(f"\n{winning_pokemon} beat {opponent_pokemon['name']}." if winner == 'player' else f"{player_pokemon['name']} beat {winning_pokemon}.")
                 print(f"The Winner is: {winner}")
             else:
                 print("Invalid stat choice. Please choose id, height, or weight.")
@@ -85,4 +83,5 @@ def play_game():
         if play_again.lower() != 'yes':
             break
 
-play_game()
+if __name__ == "__main__":
+    play_game()
