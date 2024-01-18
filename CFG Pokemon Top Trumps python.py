@@ -65,36 +65,44 @@ def play_game():
     player_pokemon = choose_pokemon()
     opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
 
+    stat_choices = ['1. id', '2. height', '3. weight']
+    print("\nChoose a stat to compare:")
+    for i, stat in enumerate(stat_choices, start=1):
+        print(f"{i}. {stat}")
+
     #Give Player/Computer ther card
     while True: 
-            print(f"Your Pokemon: {player_pokemon['name']} (ID: {player_pokemon['id']}) (height: {player_pokemon['height']}) (weight:{player_pokemon['weight']})")
-
-            #Player chooses stat
-            stat_choices = ['id', 'height', 'weight']
-            chosen_stat = input("Choose a stat to compare (id,height,or weight)").lower()
-
-
-            if chosen_stat in stat_choices:
-                winner,winning_pokemon = compare_stats(
-                    player_pokemon,
-                    opponent_pokemon,
-                    player_pokemon[chosen_stat],
-                    opponent_pokemon[chosen_stat],
-                    chosen_stat,
-                    player_pokemon['name'],
-                    opponent_pokemon['name']
+            try:
+                choice = int(input("Enter the number of your chosen stat: "))
+                if 1 <= choice <= len(stat_choices):
+                    chosen_stat = stat_choices[choice - 1].split()[-1]
+                    break
+                else:
+                    print("Invalid input. Please enter a valid number.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+    
+    winner,winning_pokemon = compare_stats(
+        player_pokemon,
+        opponent_pokemon,
+        player_pokemon[chosen_stat],
+        opponent_pokemon[chosen_stat],
+        chosen_stat,
+        player_pokemon['name'],
+        opponent_pokemon['name']
                     )
-                print(f"\n{winning_pokemon} beat {opponent_pokemon['name']}." if winner == 'player' else f"{player_pokemon['name']} beat {winning_pokemon}.")
-                print(f"The Winner is: {winner}")
-            else:
-                print("Invalid stat choice. Please choose id, height, or weight.")
+    print(f"\n{winning_pokemon} beat {opponent_pokemon['name']}." if winner == 'player' else f"{player_pokemon['name']} beat {winning_pokemon}.")
+    print(f"The Winner is: {winner}")
+  
+    play_again = input("\nDo you want to play again? (yes/no): ".lower())
+    if play_again.lower() == 'yes':
+        player_pokemon = choose_pokemon()
+        opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
+    else:
+        return
 
-            play_again = input("\nDo you want to play again? (yes/no): ")
-            if play_again.lower() == 'yes':
-                player_pokemon = choose_pokemon()
-                opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
-            else:
-                break
+    player_pokemon = choose_pokemon()
+    opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
 
 if __name__ == "__main__":
     play_game()
