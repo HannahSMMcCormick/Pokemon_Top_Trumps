@@ -12,10 +12,11 @@ def get_random_pokemon_id():
 #get pokemon info from API
 def get_pokemon_data(pokemon_id):
     url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id}/"
-    response = requests.get(url)
-
-#Checks for successful request 
-    if response.status_code == 200:
+    
+    #Checks for successful request
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
         data = response.json()
         return{
             'name': data['name'],
@@ -24,111 +25,99 @@ def get_pokemon_data(pokemon_id):
             'weight': data['weight']
         }
     #If request fails
-    else:
-        print(f"Failed to retrieve data for Pokemon with ID {pokemon_id}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to retrieve data for Pokemon with ID {pokemon_id}: {e}")
         return None
-#Who wins   
-def compare_stats(player_pokemon, opponent_pokemon, player_stat, opponent_stat, stat_name, player_name, opponent_name):
-    #Player Wins
-    if player_stat > opponent_stat:
-        print(f"You Win! Your {stat_name} is higher.")
-        return 'player',player_name
-    #Computer wins
-    elif player_stat < opponent_stat:
-        print(f"You lose! Opponent's {stat_name} is higher.")
-        return 'opponent',opponent_name
-    #Tie
-    else:
-        print(f"It's a tie! Both have the same{stat_name}.")
-        return 'tie',None
+    
+#Prints pokemon details
+def print_pokemon_details(pokemon):
+    print(f"{pokemon['name'].capitalize()} (ID: {pokemon['id']}) (height: {pokemon['height']}) (weight: {pokemon['weight']})")
 
 #Player chooses pokemon
 def choose_pokemon():
-    pokemon_list = [get_pokemon_data(get_random_pokemon_id())for i in range(3)]
+    pokemon_list = [get_pokemon_data(get_random_pokemon_id()) for _ in range(3)]
 
     print("Choose your pokemon:")
     for i, pokemon in enumerate(pokemon_list, start=1):
-        print(f"{i}. {pokemon['name'].capitalize()} (ID: {pokemon['id']}) (height: {pokemon['height']}) (weight:{pokemon['weight']})")
+        print(f"{i}. ", end="")
+        print_pokemon_details(pokemon)
 
     while True:
-        try: 
+        try:
             choice = int(input("Enter the number of your chosen Pokemon: "))
             if 1 <= choice <= len(pokemon_list):
                 return pokemon_list[choice - 1]
-            else: 
+            else:
                 print("Invalid input. Please enter a valid number.")
         except ValueError:
             print("Invalid input. Please enter a number.")
 
-#Sets up game
-#Initialises Scores
 
-player_score = 0
-opponent_score = 0
+#Text
+def print_stat_choices():
+    stat_choices = ['id', 'height', 'weight']
+    print("\nChoose a stat to compare:")
+    for i, stat in enumerate(stat_choices, start=1):
+        print(f"{i}. {stat.capitalize()}")
+    return stat_choices
 
-#Gameplay
+#If player chooses one round
+def play_round(player_pokemon, opponent_pokemon, chosen_stat):
+    player_stat = player_pokemon[chosen_stat]
+    opponent_stat = opponent_pokemon[chosen_stat]
+
+    if player_stat > opponent_stat:
+        return 'player', player_pokemon['name']
+    elif player_stat < opponent_stat:
+        return 'opponent', opponent_pokemon['name']
+    else:
+        return 'tie', None
+    
+#Main game
 def play_game(rounds):
+    player_score = 0
+    opponent_score = 0
 
-    #Sets scores global so that they can be accessed outside function
-    global player_score
-    global opponent_score
-
-    #Loops for set number of rounds
-    for i in range(rounds):
+    for _ in range(rounds):
         player_pokemon = choose_pokemon()
         opponent_pokemon = get_pokemon_data(get_random_pokemon_id())
 
-        stat_choices = ['1. id', '2. height', '3. weight']
-        print("\nChoose a stat to compare:")
-        for i, stat in enumerate(stat_choices, start=1):
-            print(f"{i}. {stat}")
+        print_pokemon_details(player_pokemon)
+        print_pokemon_details(opponent_pokemon)
+        
+        stat_choices = print_stat_choices()
 
+        print_stat_choices()
         chosen_stat = None
 
-        try:
-            choice = int(input("Enter the number of your chosen stat: "))
-            if 1 <= choice <= len(stat_choices):
-                chosen_stat = stat_choices[choice - 1].split()[-1]
-            else:
-                print("Invalid input. Please enter a valid number.")
-                continue
+        while chosen_stat is None:
+            try:
+                choice = int(input("Enter the number of your chosen stat: "))
+                if 1 <= choice <= len(stat_choices):
+                    chosen_stat = stat_choices[choice - 1]
+                else:
+                    print("Invalid input. Please enter a valid number.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
 
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-            continue
-            
-        #Tuple unpacking return values of compare_stats function
-        winner,winning_pokemon = compare_stats(
-            player_pokemon,
-            opponent_pokemon,
-            player_pokemon[chosen_stat],
-            opponent_pokemon[chosen_stat],
-            chosen_stat,
-            player_pokemon['name'],
-            opponent_pokemon['name']
-                            )
-                
-        #Player Scores
+        winner, winning_pokemon = play_round(player_pokemon, opponent_pokemon, chosen_stat)
+
         if winner == 'player':
             player_score += 1
         elif winner == 'opponent':
             opponent_score += 1
 
-        #Results
         print(f"\n{winning_pokemon} beat {opponent_pokemon['name']}." if winner == 'player' else f"{player_pokemon['name']} beat {winning_pokemon}.")
         print(f"The Winner is: {winner}")
         print(f"Current Scores - player: {player_score}, Opponent: {opponent_score}")
-    
-    #Game end 
+
     print('\nGame Over!')
     print(f"Final Scores - Player: {player_score}, Opponent: {opponent_score}")
-    
-    #Asks if player wants to play again and if so start the game again
-    play_again = input("\nDo you want to play again? (yes/no): ".lower())
-    if play_again.lower() == 'yes':
+
+    play_again = input("\nDo you want to play again? (yes/no): ").lower()
+    if play_again == 'yes':
         rounds = int(input("Enter the number of rounds: "))
         play_game(rounds)
-
 
 if __name__ == "__main__":
     rounds = int(input("Enter the number of rounds: "))
